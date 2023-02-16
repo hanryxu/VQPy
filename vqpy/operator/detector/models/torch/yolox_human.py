@@ -8,6 +8,7 @@ from typing import Dict, List
 import numpy as np
 import torch
 from loguru import logger
+import cv2
 from vqpy.operator.detector.base import DetectorBase
 from vqpy.class_names.coco import COCO_CLASSES
 
@@ -15,23 +16,25 @@ from yolox.exp import Exp as MyExp
 from yolox.utils import postprocess, fuse_model
 from yolox.utils.model_utils import get_model_info
 
-# Exp from https://github.com/ifzhang/ByteTrack/blob/d1bf0191adff59bc8fcfeaa0b33d3d1642552a99/exps/example/mot/yolox_x_mix_det.py
+
+# Exp from https://github.com/ifzhang/ByteTrack/blob/d1bf0191adff59bc8fcfeaa0b33d3d1642552a99/exps/example/mot/yolox_s_mix_det.py   # noqa: E501
 class Exp(MyExp):
     def __init__(self):
         super(Exp, self).__init__()
         self.num_classes = 1
-        self.depth = 1.33
-        self.width = 1.25
-        self.exp_name = "yolox_x_mix_det"
-        self.input_size = (800, 1440)
-        self.test_size = (800, 1440)
-        self.random_size = (18, 32)
+        self.depth = 0.33
+        self.width = 0.50
+        self.exp_name = "yolox_s_mix_det"
+        self.input_size = (608, 1088)
+        self.test_size = (608, 1088)
+        self.random_size = (12, 26)
         self.test_conf = 0.001
         self.nmsthre = 0.7
         self.no_aug_epochs = 10
         self.basic_lr_per_img = 0.001 / 64.0
 
 
+# preproc from older versions of YOLOX
 def preproc(image, input_size, mean, std, swap=(2, 0, 1)):
     if len(image.shape) == 3:
         padded_img = np.ones((input_size[0], input_size[1], 3)) * 114.0

@@ -187,6 +187,9 @@ class ByteTracker(GroundTrackerBase):
 
     def update(self, data: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
         frame_id = self.ctx.frame_id
+        # this increments track_id for each new data point
+        # (Data.__init__() always increments track_id)
+        # not quite what we expect
         dets: List[ByteTracker.Data] = [ByteTracker.Data(x) for x in data]
 
         activated_stracks: List[ByteTracker.Data] = []

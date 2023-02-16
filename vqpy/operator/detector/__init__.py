@@ -6,11 +6,13 @@ All visible instances in this folder inherits (base.py).
 from vqpy.operator.detector.models.onnx.yolov4 import Yolov4Detector
 from vqpy.operator.detector.models.onnx.faster_rcnn import FasterRCNNDdetector
 from vqpy.operator.detector.models.torch.yolox import YOLOXDetector
+from vqpy.operator.detector.models.torch.yolox_human import YOLOXHumanDetector
 from vqpy.operator.detector.base import DetectorBase
 import os
 from typing import Optional
 from loguru import logger
 import torch.hub
+from typing import Tuple
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_DETECTOR_WEIGHTS_DIR = os.path.join(dir_path, "weights/")
@@ -48,11 +50,18 @@ register("faster_rcnn", FasterRCNNDdetector, faster_rnnn_path, None)
 yolov4_path = os.path.join(DEFAULT_DETECTOR_WEIGHTS_DIR, "yolov4.onnx")
 register("yolov4", Yolov4Detector, yolov4_path, None)
 
+# bytetrack_s_mot17 weight from
+# https://github.com/ifzhang/ByteTrack#mot17-test-model
+yolox_s_mix_det_path = os.path.join(
+    DEFAULT_DETECTOR_WEIGHTS_DIR, "bytetrack_s_mot17.pth.tar"
+)
+register("yolox_s_human", YOLOXHumanDetector, yolox_s_mix_det_path, None)
+
 
 def setup_detector(cls_names,
                    detector_name: Optional[str] = None,
                    detector_args: Optional[dict] = dict()
-                   ) -> (str, DetectorBase):
+                   ) -> Tuple[str, DetectorBase]:
     """setup a detector for video analytics
     cls_names: the detection class types of the required detector
     """
