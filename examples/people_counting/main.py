@@ -1,10 +1,12 @@
+# query on video pedestrian.mp4 from https://www.kaggle.com/datasets/jayitabhattacharyya/social-distance # noqa: E501
+
 import argparse
 import vqpy
 
 
 def make_parser():
-    parser = argparse.ArgumentParser('VQPy Demo!')
-    parser.add_argument('--path', help='path to video')
+    parser = argparse.ArgumentParser("VQPy Demo!")
+    parser.add_argument("--path", help="path to video")
     parser.add_argument(
         "--save_folder",
         default=None,
@@ -14,11 +16,10 @@ def make_parser():
 
 
 class Person(vqpy.VObjBase):
-
     @vqpy.property()
     @vqpy.stateful(4)
     def direction_vector(self):
-        tlbr_c, tlbr_p = self.getv('tlbr'), self.getv('tlbr', -5)
+        tlbr_c, tlbr_p = self.getv("tlbr"), self.getv("tlbr", -5)
         if tlbr_c is None or tlbr_p is None:
             return None
         center_c = (tlbr_c[:2] + tlbr_c[2:]) / 2
@@ -49,27 +50,29 @@ class Person(vqpy.VObjBase):
 
         def most_frequent(List):
             from collections import Counter
+
             occurence_count = Counter(List)
             return occurence_count.most_common(1)[0][0]
 
         hist_len = 10
-        tlbr_past = [
-            self.getv("tlbr", i) for i in range(-(1 + hist_len), -1)
-        ]
+        tlbr_past = [self.getv("tlbr", i) for i in range(-(1 + hist_len), -1)]
+
         for value in tlbr_past:
             if value is None:
                 return None
 
         centers = list(map(get_center, tlbr_past))
-        diffs = [centers[i+1] - centers[i] for i in range(hist_len - 1)]
+        diffs = [centers[i + 1] - centers[i] for i in range(hist_len - 1)]
 
         diff_xs = [denoise(diff[0], diff[1]) for diff in diffs]
         diff_ys = [denoise(diff[1], diff[0]) for diff in diffs]
 
-        horizontal = most_frequent([get_name(diff_x, "right", "left")
-                                    for diff_x in diff_xs])
-        vertical = most_frequent([get_name(diff_y, "bottom", "top")
-                                  for diff_y in diff_ys])
+        horizontal = most_frequent(
+            [get_name(diff_x, "right", "left") for diff_x in diff_xs]
+        )
+        vertical = most_frequent(
+            [get_name(diff_y, "bottom", "top") for diff_y in diff_ys]
+        )
         direction = vertical + horizontal
         if direction == "":
             direction = None
@@ -77,81 +80,78 @@ class Person(vqpy.VObjBase):
         return direction
 
 
-class CountPersonOnCrosswalk(vqpy.QueryBase):
-
+class CountPerson(vqpy.QueryBase):
     @staticmethod
     def set_output_configs() -> vqpy.query.OutputConfig:
         return vqpy.query.OutputConfig(
             # output_frame_vobj_num=True,
             output_total_vobj_num=True
-            )
+        )
 
     @staticmethod
     def setting() -> vqpy.VObjConstraint:
 
-        CROSSWALK_REGION_1 = [(731, 554), (963, 564), (436, 1076), (14, 1076)]
-        CROSSWALK_REGION_2 = [(1250, 528), (1292, 473),
-                              (1839, 492), (1893, 547)]
-        CROSSWALK_REGIONS = [CROSSWALK_REGION_1, CROSSWALK_REGION_2]
-
-        filter_cons = {"__class__": lambda x: x == Person,
-                       "bottom_center": vqpy.query.utils.within_regions(
-                            CROSSWALK_REGIONS
-                            )}
-        select_cons = {"track_id": None,
-                       }
-        return vqpy.VObjConstraint(filter_cons=filter_cons,
-                                   select_cons=select_cons,
-                                   filename='on_crosswalk')
+        filter_cons = {
+            "__class__": lambda x: x == Person,
+        }
+        return vqpy.VObjConstraint(filter_cons=filter_cons, filename="person")
 
 
-class CountPersonHeadLeft(CountPersonOnCrosswalk):
-
+class CountPersonHeadLeft(CountPerson):
     @staticmethod
     def set_output_configs() -> vqpy.query.output_config.OutputConfig:
         return vqpy.query.output_config.OutputConfig(
             # output_frame_vobj_num=True,
             output_total_vobj_num=True
-            )
+        )
 
     @staticmethod
     def setting() -> vqpy.VObjConstraint:
         filter_cons = {"direction": lambda x: "left" in x}
-        select_cons = {"track_id": None,
-                       "direction": None,
-                       "direction_vector": None
-                       }
-        return vqpy.VObjConstraint(filter_cons=filter_cons,
-                                   select_cons=select_cons,
-                                   filename='head_left')
+        select_cons = {
+            "track_id": None,
+            "direction": None,
+            "direction_vector": None,
+            "tlbr": lambda x: str(x),
+        }
+        return vqpy.VObjConstraint(
+            filter_cons=filter_cons,
+            select_cons=select_cons,
+            filename="head_left",
+        )
 
 
-class CountPersonHeadRight(CountPersonOnCrosswalk):
-
+class CountPersonHeadRight(CountPerson):
     @staticmethod
     def set_output_configs() -> vqpy.query.output_config.OutputConfig:
         return vqpy.query.output_config.OutputConfig(
             # output_frame_vobj_num=True,
             output_total_vobj_num=True
-            )
+        )
 
     @staticmethod
     def setting() -> vqpy.VObjConstraint:
         filter_cons = {"direction": lambda x: "right" in x}
-        select_cons = {"track_id": None,
-                       "direction": None,
-                       "direction_vector": None
-                       }
-        return vqpy.VObjConstraint(filter_cons=filter_cons,
-                                   select_cons=select_cons,
-                                   filename='head_right')
+        select_cons = {
+            "track_id": None,
+            "direction": None,
+            "direction_vector": None,
+            "tlbr": lambda x: str(x),
+        }
+        return vqpy.VObjConstraint(
+            filter_cons=filter_cons,
+            select_cons=select_cons,
+            filename="head_right",
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = make_parser().parse_args()
-    vqpy.launch(cls_name=vqpy.COCO_CLASSES,
-                cls_type={"person": Person},
-                tasks=[CountPersonHeadLeft(), CountPersonHeadRight()],
-                video_path=args.path,
-                save_folder=args.save_folder,
-                )
+    vqpy.launch(
+        cls_name=vqpy.COCO_CLASSES,
+        cls_type={"person": Person},
+        tasks=[CountPersonHeadLeft(), CountPersonHeadRight()],
+        video_path=args.path,
+        save_folder=args.save_folder,
+        # detector_name="yolox_s_human"
+    )
