@@ -4,6 +4,7 @@ All visible instances in this folder inherits (base.py).
 """
 
 from .byte_tracker import ByteTracker
+from .norfair_tracker import NorfairTracker
 
 vqpy_trackers = {}
 
@@ -18,6 +19,7 @@ def register(tracker_name, tracker):
 
 
 register("byte", ByteTracker)
+register("norfair", NorfairTracker)
 
 
 def setup_ground_tracker(tracker_name: str = "byte", **kwargs):
