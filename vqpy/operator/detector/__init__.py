@@ -6,7 +6,7 @@ All visible instances in this folder inherits (base.py).
 from vqpy.operator.detector.models.onnx.yolov4 import Yolov4Detector
 from vqpy.operator.detector.models.onnx.faster_rcnn import FasterRCNNDdetector
 from vqpy.operator.detector.models.torch.yolox import YOLOXDetector
-from vqpy.operator.detector.models.ultralytics.yolov8 import YoloDetector
+from vqpy.operator.detector.models.ultralytics.yolo import YoloDetector
 from vqpy.operator.detector.base import DetectorBase
 import os
 from typing import Optional
