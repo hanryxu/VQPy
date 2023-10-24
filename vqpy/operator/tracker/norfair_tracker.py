@@ -43,7 +43,12 @@ class NorfairTracker(GroundTrackerBase):
 
     def __init__(self, distance_function="iou", distance_threshold=0.7):
         self.norfair_tracker = Tracker(
-            distance_function=distance_function, distance_threshold=distance_threshold)
+            distance_function=distance_function,
+            distance_threshold=distance_threshold,
+            # https://github.com/tryolabs/norfair/issues/65
+            # set initialization_delay to 0 to start tracking immediately
+            initialization_delay=0
+        )
         self.prev_frame_id = None
 
     def update(self, frame_id: int,
