@@ -12,7 +12,7 @@ def vqpy_detections_to_norfair_detections(
     norfair_detections: List[Detection] = []
 
     for detection in vqpy_detections:
-        vqpy_bbox = detection['tlbr']
+        vqpy_bbox = detection['tlbr'].reshape((2,2))
         vqpy_score = np.array([detection['score'], detection['score']])
         vqpy_index = detection['index']
         norfair_detections.append(
