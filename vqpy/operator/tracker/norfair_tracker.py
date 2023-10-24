@@ -56,4 +56,4 @@ class NorfairTracker(GroundTrackerBase):
         detections = vqpy_detections_to_norfair_detections(data)
         tracked_objects = self.norfair_tracker.update(
             detections=detections, period=period)
-        return norfair_tracks_to_vqpy_tracks(tracked_objects)
+        return (norfair_tracks_to_vqpy_tracks(tracked_objects), [])
