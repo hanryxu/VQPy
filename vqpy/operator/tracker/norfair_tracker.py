@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict
 
 
 def vqpy_detections_to_norfair_detections(
-    vqpy_detections: List[Dict]
+    vqpy_detections: List[Dict], current_frame_id
 ) -> List[Detection]:
     """convert detections_as_xywh to norfair detections"""
     norfair_detections: List[Detection] = []
@@ -17,20 +17,28 @@ def vqpy_detections_to_norfair_detections(
         vqpy_index = detection['index']
         norfair_detections.append(
             Detection(
-                points=vqpy_bbox, scores=vqpy_score, vqpy_index=vqpy_index
+                points=vqpy_bbox,
+                scores=vqpy_score,
+                vqpy_index=vqpy_index,
+                vqpy_frame_id=current_frame_id,
             )
         )
 
     return norfair_detections
 
 
-def norfair_tracks_to_vqpy_tracks(tracked_objects):
+def norfair_tracks_to_vqpy_tracks(tracked_objects, current_frame_id):
     vqpy_tracks = []
     for tracked_object in tracked_objects:
+        # tracked_object's last_detections not from current frame: tracked_object is not present in current frame (but still classified as "active" by norfair)
+        if tracked_object.last_detection.vqpy_frame_id != current_frame_id:
+            continue
+        # if in current frame, just use vqpy_index from detection
         vqpy_tracks.append(
-            {'index': tracked_object.vqpy_index,
-             'track_id': tracked_object.id
-             }
+            {
+                "index": tracked_object.last_detection.vqpy_index,
+                "track_id": tracked_object.id,
+            }
         )
     return vqpy_tracks
 
@@ -58,7 +66,8 @@ class NorfairTracker(GroundTrackerBase):
         """
         period = frame_id - self.prev_frame_id if self.prev_frame_id is not None else 1
         self.prev_frame_id = frame_id
-        detections = vqpy_detections_to_norfair_detections(data)
+        detections = vqpy_detections_to_norfair_detections(data, frame_id)
         tracked_objects = self.norfair_tracker.update(
-            detections=detections, period=period)
-        return (norfair_tracks_to_vqpy_tracks(tracked_objects), [])
+            detections=detections, period=period
+        )
+        return (norfair_tracks_to_vqpy_tracks(tracked_objects, frame_id), [])
