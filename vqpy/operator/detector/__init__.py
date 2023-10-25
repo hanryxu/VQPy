@@ -6,6 +6,7 @@ All visible instances in this folder inherits (base.py).
 from vqpy.operator.detector.models.onnx.yolov4 import Yolov4Detector
 from vqpy.operator.detector.models.onnx.faster_rcnn import FasterRCNNDdetector
 from vqpy.operator.detector.models.torch.yolox import YOLOXDetector
+from vqpy.operator.detector.models.ultralytics.yolo import YoloDetector
 from vqpy.operator.detector.base import DetectorBase
 import os
 from typing import Optional
@@ -47,6 +48,10 @@ register("faster_rcnn", FasterRCNNDdetector, faster_rnnn_path, None)
 
 yolov4_path = os.path.join(DEFAULT_DETECTOR_WEIGHTS_DIR, "yolov4.onnx")
 register("yolov4", Yolov4Detector, yolov4_path, None)
+
+yolov8m_path = os.path.join(DEFAULT_DETECTOR_WEIGHTS_DIR, "yolov8m.pt")
+yolov8m_url = "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8m.pt"
+register("yolov8m", YoloDetector, yolov8m_path, yolov8m_url)
 
 
 def setup_detector(cls_names,
