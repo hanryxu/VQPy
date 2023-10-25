@@ -1,5 +1,6 @@
 from typing import Dict, List
 import numpy as np
+import cv2
 from vqpy.operator.detector.base import DetectorBase
 from vqpy.class_names.coco import COCO_CLASSES
 
@@ -19,7 +20,7 @@ class YoloDetector(DetectorBase):
     def inference(self, img: np.ndarray) -> List[Dict]:
         rets = []
         predictions = self.model.predict(
-            img, device=self.device, conf=self.threshold, verbose=False
+            cv2.cvtColor(img, cv2.COLOR_BGR2RGB), device=self.device, conf=self.threshold, verbose=False
         )
         for pred_xyxy, pred_conf, pred_cls in zip(
             predictions[0].boxes.xyxy,
