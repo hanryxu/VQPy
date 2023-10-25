@@ -153,6 +153,7 @@ def run(
     executor,
     save_folder: str = None,
     print_results: bool = True,
+    query_video_name: str = "DefaultName",
 ):
     """
     Args:
@@ -168,7 +169,7 @@ def run(
     if save_folder:
         os.makedirs(save_folder, exist_ok=True)
         time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = executor.launch_args["query_name"] + "_" + time + ".json"
+        filename = executor.launch_args["query_name"] + "_" + query_video_name + "_" + time + ".json"
         save_path = os.path.join(save_folder, filename)
         print(f"Saving result to {save_path}")
         import time
